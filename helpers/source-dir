@@ -1,0 +1,13 @@
+# -*- shell-script -*-
+
+if ! type source-dir &> /dev/null ; then
+    source-dir()
+    {
+	test -z "$1" && return 1
+	local _backup_glob='@(#*#|*@(~|.@(bak|orig|rej|swp|dpkg*|rpm@(orig|new|save))))'
+	for script in $1/* ; do
+	    [[ ${script} != @($_backup_glob|GNUMakefile*|Makefile*|README*) \
+		&& -f ${script} && -r ${script} ]] && source "${script}"
+	done
+    }
+fi

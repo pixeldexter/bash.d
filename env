@@ -1,0 +1,12 @@
+# -*- shell-script -*-
+# ~/.bash_env: executed to set up environment for interactive shells
+
+_bashdir=${BASH_SOURCE%/*}/.bash.d/
+
+source $_bashdir/helpers/source-dir
+source-dir $_bashdir/env.d
+test   -e $_bashdir/../.bash_env.local \
+    -a -r $_bashdir/../.bash_env.local \
+    &&  . $_bashdir/../.bash_env.local \
+
+# other completions may be added here
