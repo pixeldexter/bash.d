@@ -1,0 +1,35 @@
+# -*- shell-script -*-
+# User identification
+
+_confdir="${XDG_CONFIG_HOME:-${HOME}/.config}"
+
+# Read a value from global config.
+#   $1 section glob
+#   $2 key name glob
+function _git_config_global()
+{
+    local _file _line _in_section
+    for _file in "$HOME/.gitconfig" "$_confdir/git/config" ; do
+	test -r "$_file" || continue
+
+	while read _line ; do
+	    [[ "$_line" == @(\[*\]) ]] && _in_section=${_line//[\[\]]/}
+	    if [[ "$_in_section" == @($1) ]] ; then
+		if [[ "${_line%% =*}" == @($2) ]] ; then
+		    echo "${_line#* = }"
+		    return 0
+		fi
+	    fi
+	done < $_file
+    done
+    return 2 # ENOENT
+}
+
+_confval=$(_git_config_global user name)
+test -n "$_confval" && export DEBFULLNAME=$_confval
+_confval=$(_git_config_global user email)
+test -n "$_confval" && export DEBEMAIL=$_confval
+
+unset _confdir
+unset _confval
+unset _git_config_global

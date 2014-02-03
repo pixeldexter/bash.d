@@ -1,0 +1,25 @@
+# -*- shell-script -*-
+# Customizations for various command line tools
+# including bash itself.
+
+# don't put duplicate lines in the history. See bash(1) for more options
+# don't overwrite GNU Midnight Commander's setting of `ignorespace'.
+export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
+# ... or force ignoredups and ignorespace
+export HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+export MANWIDTH=72
+
+# try to find suitable editor
+test -x /usr/bin/vi  && export EDITOR=vi
+test -x /usr/bin/vim && export EDITOR=vim

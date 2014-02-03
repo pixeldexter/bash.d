@@ -40,7 +40,5 @@ if [ -f /etc/bash_completion ]; then
 fi
 
 
-# this is a temporary shim to source
-# an original .bashrc without cluttering
-# up this file. TO BE REMOVED
-source $_bashdir/../.bashrc.orig
+#
+# Other customizations

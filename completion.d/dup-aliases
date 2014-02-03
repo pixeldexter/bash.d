@@ -1,0 +1,22 @@
+# bash completion script                  -*- shell-script -*-
+
+#
+# assign aliases the same completion method as for its
+# parent command
+#
+_auto_alias_completions()
+{
+    local _words _key _completion
+    for _key in "${!BASH_ALIASES[@]}" ; do
+	_words=( ${BASH_ALIASES[${_key}]} )
+	if [ -n "${_words[0]}" -a "${_key}" != "${_words[0]}" ] ; then
+	    if complete -p "${_words[0]}" &> /dev/null ; then
+		_completion=$(complete -p "${_words[0]}")
+		_completion="${_completion%%${_words[0]}}${_key}"
+		eval "$_completion"
+	    fi
+	fi
+    done
+}
+_auto_alias_completions
+unset _auto_alias_completions
