@@ -1,0 +1,6 @@
+# -*- shell-script -*-
+# special git variant used for dotfile processing
+
+if [ -d ~/GIT/dotfiles.git ] ; then
+    alias dot-git="git --git-dir=$HOME/GIT/dotfiles.git --work-tree=$HOME"
+fi
