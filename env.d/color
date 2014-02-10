@@ -3,7 +3,8 @@
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    xterm-color) color_prompt=yes;;
+    xterm) color_prompt=yes;;
+    *-color|*-256color|*-88color|*-16color) color_prompt=yes;;
 esac
 
 # set variable identifying the chroot you work in (used in the prompt below)
