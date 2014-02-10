@@ -16,13 +16,6 @@ fi
 
 
 #
-# The next step is to source all extra rc scripts
-if [ -d ~/.bash.d/rc.d ] ; then
-    source-dir ~/.bash.d/rc.d
-fi
-
-
-#
 # Set up aliases that might rely on any of the
 # above steps.
 if [ -f ~/.bash_aliases ]; then
@@ -39,6 +32,12 @@ if [ -f /etc/bash_completion ]; then
    . /etc/bash_completion
 fi
 
+
+#
+# The next step is to source all extra rc scripts
+if [ -d ~/.bash.d/rc.d ] ; then
+    source-dir ~/.bash.d/rc.d
+fi
 
 #
 # Other customizations
