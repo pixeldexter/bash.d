@@ -1,0 +1,14 @@
+# -*- mode: shell-script -*-
+
+GIT_PS1_SHOWDIRTYSTATE=yes
+GIT_PS1_SHOWSTASHSTATE=yes
+GIT_PS1_SHOWUPSTREAM=auto
+
+if [[ $(type -t __git_ps1) == "function" ]] ; then
+    suffix=''
+    case "$PS1" in
+	*\\\$\ ) suffix='\$ ' ;;
+    esac
+    PS1="${PS1:0:-${#suffix}}\$(__git_ps1)${suffix}"
+    unset suffix
+fi
