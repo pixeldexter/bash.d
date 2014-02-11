@@ -27,3 +27,6 @@ export MANWIDTH=72
 test -x /usr/bin/vi  && export EDITOR=vi
 test -x /usr/bin/vim && export EDITOR=vim
 
+# prompt
+PROMPT_DIRTRIM=1
+PS1='\u@\h:\w\$ '
