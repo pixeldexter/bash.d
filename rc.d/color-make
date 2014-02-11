@@ -1,6 +1,0 @@
-# -*- shell-script -*-
-# Colorize output of make
-
-if [ -x /usr/bin/colormake ]; then
-    : alias make='colormake'
-fi
