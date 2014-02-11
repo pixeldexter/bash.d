@@ -2,6 +2,27 @@
 # Color customizations
 ## require: ENV
 
+declare -Ag _COLORS_
+_COLORS_[RED]="\033[0;31m"
+_COLORS_[GREEN]="\033[0;32m"
+_COLORS_[YELLOW]="\033[0;33m"
+_COLORS_[BLUE]="\033[0;34m"
+_COLORS_[MAGENTA]="\033[0;35m"
+_COLORS_[CYAN]="\033[0;36m"
+_COLORS_[WHITE]="\033[0;37m"
+_COLORS_[COLOR_NONE]="\e[0m"
+readonly _COLORS_
+
+function list-colors()
+{
+    local i max=${1:-16}
+
+    for((i=0; $i!=$max; ++i)); do
+	printf "%03d \033[39;49;38;5;${i}m%8s\033[40m%-8s\033[0m"   $i "TEXT" "TEXT"
+	printf "     \033[39;49;48;5;${i}m%8s\033[37m%-8s\033[0m\n"    "TEXT" "TEXT"
+    done
+}
+
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm) color_prompt=yes;;
