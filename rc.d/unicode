@@ -1,0 +1,83 @@
+# -*- mode: shell-script -*-
+
+# unicode fun
+
+function _unicode_print_utf8()
+{
+    local count hex arg=$1
+    local mask header
+    if [[ "$1" -lt 128 ]] ; then
+    	printf -v hex "%s%02x%s" '\x' "$1" "$hex"
+    else
+	for((count=5; $count!=0; --count)); do
+	    printf -v hex "%s%02x%s" '\x' $(( ($arg&63) | 128)) "$hex"
+	    let $((arg>>=6))
+	    mask="$(( (1<<$count)-1 ))"
+	    header="$(( 255^((1 << $count) + (1 << $count) - 1) ))"
+	    if [[ "${arg}" -le "${mask}" ]] ; then
+		printf -v hex "%s%02x%s" '\x' $(( ($arg&$mask) | $header)) "$hex"
+		break
+	    fi
+	done
+    fi
+    echo -ne "$hex"
+}
+
+function _unicode_print_range() # $1-$2=code range
+{
+    local min=$1 max=$2
+    local minrow=$(($min & 65520)) mincol=$(($min & 15))
+    local maxrow=$(($max & 65520)) maxcol=$(($max & 15))
+    local row col
+
+    echo ""
+    echo "    | 0 1 2 3 4 5 6 7 8 9 a b c d e f"
+    echo "----+--------------------------------"
+    for((row=minrow; $row<=maxrow; row+=16)); do
+	printf "%03xx|" $(($row>>4))
+	for ((col=0; $col!=16; ++col)) ; do
+	    if   [[ "$row" -eq "$minrow" && "$col" -lt "$mincol" ]] ; then
+		echo -n "  "
+	    elif [[ "$row" -eq "$maxrow" && "$col" -gt "$maxcol" ]] ; then
+		break		
+	    else
+		echo -n " "
+		_unicode_print_utf8 $(($row+$col))
+		:
+	    fi
+	done
+	
+	printf "\n"
+    done
+    echo ""
+}
+
+declare -A _unicode_blocks=(
+    [ASCII]="0x20 0x7F"
+    
+)
+
+function unicode-list-blocks()
+{
+    local block
+    for block in "${!_unicode_blocks[@]}" ; do
+	echo "  $block : ${_unicode_blocks[$block]}"
+    done
+}
+
+function unicode-print-block()
+{
+    if   [[ -n "$2" && -n "$1" ]] ; then
+	_unicode_print_range $1 $2
+    elif [[ -n "$1" ]] ; then
+	 if [[ -z "${_unicode_blocks[$1]}" ]] ; then
+	     echo "Unicode block $1 not found" 1>&2
+	     return 2
+	 fi
+	 _unicode_print_range ${_unicode_blocks[$1]}
+    else
+	echo "Either name a range (unicode-list-blocks) or" 1>&2
+	echo "provide min and max" 1>&2
+	return 2
+    fi
+}
