@@ -1,6 +1,8 @@
-# -*- shell-script -*-
-# Customizations for various command line tools
-# including bash itself.
+# -*- mode: shell-script -*-
+
+#
+# basic environment setup
+#
 
 # don't put duplicate lines in the history. See bash(1) for more options
 # don't overwrite GNU Midnight Commander's setting of `ignorespace'.
@@ -18,8 +20,10 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
+# more readable man output
 export MANWIDTH=72
 
 # try to find suitable editor
 test -x /usr/bin/vi  && export EDITOR=vi
 test -x /usr/bin/vim && export EDITOR=vim
+

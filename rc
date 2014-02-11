@@ -4,40 +4,10 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-_bashdir=${BASH_SOURCE%/*}/.bash.d/
-. $_bashdir/helpers/source-dir
+. ~/.bash.d/helpers/source-dir
 
-#
-# Read in all variable definitions first because
-# they are independent of everything else.
-if [ -f ~/.bash_env ] ; then
-    . ~/.bash_env
-fi
-
-
-#
-# Set up aliases that might rely on any of the
-# above steps.
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-
-#
-# Finally, set up programmatic completion.
-# (you don't need to enable this, if it's
-# already enabled in /etc/bash.bashrc and
-# /etc/profile sources /etc/bash.bashrc).
-if [ -f /etc/bash_completion ]; then
-   . /etc/bash_completion
-fi
-
-
-#
-# The next step is to source all extra rc scripts
+# The only step required here is to source rc.d directory.
+# Automatic ordering will do the rest.
 if [ -d ~/.bash.d/rc.d ] ; then
-    source-dir ~/.bash.d/rc.d
+    source-dir-ordered ~/.bash.d/rc.d
 fi
-
-#
-# Other customizations

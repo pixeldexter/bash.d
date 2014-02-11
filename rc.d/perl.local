@@ -1,5 +1,4 @@
-# -*- shell-script -*-
-# Local perl
+# -*- mode: shell-script -*-
 
 if [ -d "$HOME/perl5" ] ; then
     export PERL_LOCAL_LIB_ROOT="$HOME/perl5";

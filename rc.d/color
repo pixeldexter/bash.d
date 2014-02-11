@@ -1,5 +1,6 @@
 # -*- shell-script -*-
 # Color customizations
+## require: ENV
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in

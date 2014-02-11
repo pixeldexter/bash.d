@@ -1,5 +1,6 @@
 # -*- mode: shell-script -*-
 
+## require: ENV
 GIT_PS1_SHOWDIRTYSTATE=yes
 GIT_PS1_SHOWSTASHSTATE=yes
 GIT_PS1_SHOWUPSTREAM=auto
