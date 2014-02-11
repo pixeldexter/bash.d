@@ -1,0 +1,8 @@
+# -*- mode: shell-script -*-
+
+function mkcd()
+{
+    [[ -n "$1" ]] || { echo "Argument required" 1>&2 ; return 2 ; }
+
+    mkdir -p "$1" && cd "$1"
+}
