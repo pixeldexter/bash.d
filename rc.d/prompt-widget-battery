@@ -1,0 +1,58 @@
+# -*- mode: shell-script -*-
+
+#
+# Battery widget to appear in command prompt.
+# To use include \$(__battery_prompt) in your PS1.
+#
+
+declare -agr _battery_unicode_drawings=(
+    "_"            # 00%-10%
+    "\xe2\x96\x81" # 10%-20%
+    "\xe2\x96\x82" # 20%-30%
+    "\xe2\x96\x83" # 30%-40%
+    "\xe2\x96\x84" # 40%-50%
+    "\xe2\x96\x85" # 50%-60%
+    "\xe2\x96\x86" # 60%-70%
+    "\xe2\x96\x87" # 70%-80%
+    "\xe2\x96\x88" # 80%-90%
+    "\xe2\x96\x88" # 90%-100%
+)
+
+function __battery_prompt()
+{
+    local batt cap result
+    local support_color=y support_unicode=y
+
+    for batt in /sys/class/power_supply/BAT*/ ; do
+	cap=$(<$batt/capacity)
+	[[ -z "${cap}" ]] && continue
+	let $((cap/=10))
+	[[ "${cap}" -ge 10 ]] && cap=9
+
+	if [[ -n "$support_color" ]] ; then
+	    if   [[ "${cap}" -ge 5 ]] ; then
+		result="${result}\e[92m"
+	    elif [[ "${cap}" -gt 1 ]] ; then
+		result="${result}\e[93m"
+	    else
+		result="${result}\e[91m"
+	    fi
+	fi
+
+	if [[ -n "$support_unicode" ]] ; then
+	    result="${result}${_battery_unicode_drawings[$cap]}"
+	else
+	    result="${result}${cap}"
+	fi
+
+	if [[ -n "$support_color" ]] ; then
+	    result="${result}\e[0m"
+	fi
+    done
+
+    if [[ -n "${result}" ]] ; then
+	echo -e "[${result}]"
+    fi
+}
+
+PS1="\$(__battery_prompt)${PS1}"
