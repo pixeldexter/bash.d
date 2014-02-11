@@ -69,3 +69,6 @@ fi
 if [ -x /usr/bin/colormake ]; then
     : alias make='colormake'
 fi
+
+# grep color
+export GREP_COLORS="cx=90:mt=103:fn=34:ln=35:bn=35:se=01;30"
