@@ -29,4 +29,4 @@ test -x /usr/bin/vim && export EDITOR=vim
 
 # prompt
 PROMPT_DIRTRIM=1
-PS1='\u@:\w\$ '
+PS1='\w\$ '
