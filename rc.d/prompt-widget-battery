@@ -2,8 +2,11 @@
 
 #
 # Battery widget to appear in command prompt.
-# To use include \$(__battery_prompt) in your PS1.
+# To use include \{battery\} in your PS1.
 #
+
+## require: prompt-functions
+## required-by: PROMPT
 
 declare -agr _battery_unicode_drawings=(
     "_"            # 00%-10%
@@ -18,7 +21,7 @@ declare -agr _battery_unicode_drawings=(
     "\xe2\x96\x88" # 90%-100%
 )
 
-function __battery_prompt()
+function __battery_show()
 {
     local batt cap result
     local support_color=y support_unicode=y
@@ -31,11 +34,11 @@ function __battery_prompt()
 
 	if [[ -n "$support_color" ]] ; then
 	    if   [[ "${cap}" -ge 5 ]] ; then
-		result="${result}\e[92m"
+		result="${result}\[\e[92m\]"
 	    elif [[ "${cap}" -gt 1 ]] ; then
-		result="${result}\e[93m"
+		result="${result}\[\e[93m\]"
 	    else
-		result="${result}\e[91m"
+		result="${result}\[\e[91m\]"
 	    fi
 	fi
 
@@ -46,7 +49,7 @@ function __battery_prompt()
 	fi
 
 	if [[ -n "$support_color" ]] ; then
-	    result="${result}\e[0m"
+	    result="${result}\[\e[0m\]"
 	fi
     done
 
@@ -55,4 +58,4 @@ function __battery_prompt()
     fi
 }
 
-PS1="\$(__battery_prompt)${PS1}"
+prompt-register-widget battery __battery_show

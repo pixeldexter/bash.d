@@ -1,15 +1,17 @@
 # -*- mode: shell-script -*-
 
 ## require: ENV
-GIT_PS1_SHOWDIRTYSTATE=yes
-GIT_PS1_SHOWSTASHSTATE=yes
-GIT_PS1_SHOWUPSTREAM=auto
+## require: prompt-functions
+## required-by: PROMPT
 
-if [[ $(type -t __git_ps1) == "function" ]] ; then
-    suffix=''
-    case "$PS1" in
-	*\\\$\ ) suffix='\$ ' ;;
-    esac
-    PS1="${PS1:0:-${#suffix}}\$(__git_ps1)${suffix}"
-    unset suffix
-fi
+function _git_prompt_show()
+{
+    # Nasty, but __git_ps1 will clobber PS1 !
+    local PS1
+    # we ain't need no stinking prefixes
+    __git_ps1 '' ''
+    # just return what __git_ps1 tells us
+    echo -e "$PS1"
+}
+
+prompt-register-widget git _git_prompt_show
