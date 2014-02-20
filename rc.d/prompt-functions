@@ -1,0 +1,70 @@
+# -*- mode: shell-script -*-
+
+declare -gA _prompt_widget_precmd
+declare -gA _prompt_widget_cmd
+declare -gA _prompt_widget_postcmd
+declare -g  PROMPT_WIDGETS
+
+function prompt-register-widget()
+{
+    [[ -z "$1" || -z "$2" ]] && return 2
+
+    if [[ ${_prompt_widget_precmd[$1]+test} || \
+	${_prompt_widget_cmd[$1]+test} || \
+	${_prompt_widget_postcmd[$1]+test} ]] ; then
+	echo "$1 is already defined, unregister first" 1>&2
+	return 2
+    fi
+
+    # parse
+    local pre post cmd="$2"
+    pre=${cmd%%:*}
+    [[ "${pre}" == "${cmd}" ]] && pre=""
+    cmd=${cmd#"${pre}":}
+    post=${cmd##*:}
+    [[ "${post}" == "${cmd}" ]] && post=""
+    cmd=${cmd%:"${post}"}
+
+    # sanity check
+    for f in ${pre} ${cmd} ${post} ; do
+	if [[ $(type -t "${f}") != "function" ]] ; then
+	    echo "$f does not look like a function" 1>&2
+	    return 2
+	fi
+    done
+
+    # register
+    [[ -n "${pre}"  ]] && _prompt_widget_precmd[$1]="${pre}"
+    [[ -n "${cmd}"  ]] && _prompt_widget_cmd[$1]="${cmd}"
+    [[ -n "${post}" ]] && _prompt_widget_postcmd[$1]="${post}"
+    return 0
+}
+
+function prompt-unregister-widget()
+{
+    [[ -z "$1" ]] && return 2
+    unset _prompt_widget_precmd[$1]
+    unset _prompt_widget_cmd[$1]
+    unset _prompt_widget_postcmd[$1]
+}
+
+function prompt-list-widget()
+{
+    if [[ -n "${1}" ]] ; then
+	echo "Widget ${1} is defined as \
+${_prompt_widget_precmd[$1]:+${_prompt_widget_precmd[$1]}:}\
+${_prompt_widget_cmd[$1]}
+${_prompt_widget_postcmd[$1]:+:${_prompt_widget_postcmd[$1]}:}\
+"
+	return 0
+    fi
+
+    local -A map
+    for key in "${!_prompt_widget_precmd[@]}" \
+	       "${!_prompt_widget_cmd[@]}"    \
+               "${!_prompt_widget_postcmd[@]}" ;
+    do
+	map["$key"]=""
+    done
+    echo "Available widgets: ${!map[@]}"
+}

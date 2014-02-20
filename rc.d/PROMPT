@@ -1,0 +1,56 @@
+# -*- mode: shell-script -*-
+
+# expand non-printing character boundary markers manually
+# this is a hack, but it works
+function __prompt_expandnp()
+{
+    local input=$1
+    input="${input//\\[/\001}"
+    input="${input//\\]/\002}"
+    echo -e "${input}"
+}
+
+# main prompt enabler
+function __prompt_assemble()
+{
+    local cmd ps1 input=$1
+    local -a widget_list
+
+    # parse input
+    while [[ ${#input} -ne 0 ]] ; do
+	if [[ "${input}" =~ ^([^{]+)\\\{ ]] ; then # normal data
+	    input=${input:${#BASH_REMATCH[1]}}
+	    ps1="${ps1}${BASH_REMATCH[1]}"
+	elif [[ "${input}" =~ ^\\\{([a-z0-9_-]+)\\\} ]] ; then # widget reference
+	    input=${input:${#BASH_REMATCH[0]}}
+	    # test for widget existence
+	    if [[  ${_prompt_widget_precmd[${BASH_REMATCH[1]}]+test} \
+		|| ${_prompt_widget_cmd[${BASH_REMATCH[1]}]+test}    \
+		|| ${_prompt_widget_postmd[${BASH_REMATCH[1]}]+test} ]] ; then
+		ps1="${ps1}\$(__prompt_expandnp \"\$__prompt_${BASH_REMATCH[1]}\")"
+		widget_list+=("${BASH_REMATCH[1]}")
+	    fi
+	else
+	    ps1="${ps1}${input}"
+	    input=""
+	fi
+    done
+
+    for w in "${widget_list[@]}" ; do
+	[[ ${_prompt_widget_precmd[$w]+test}  ]] && \
+	    cmd="${cmd}${cmd:+; }${_prompt_widget_precmd[$w]}"
+    done
+    for w in "${widget_list[@]}" ; do
+	if [[ ${_prompt_widget_cmd[$w]+test}  ]] ; then
+	    cmd="${cmd}${cmd:+; }__prompt_${w}=\$(${_prompt_widget_cmd[$w]})"
+	fi
+    done
+    for w in "${widget_list[@]}" ; do
+	[[ ${_prompt_widget_postcmd[$w]+test} ]] && \
+	    cmd="${cmd}${cmd:+; }${_prompt_widget_postcmd[$w]}"
+    done
+
+    PROMPT_COMMAND="${cmd}"
+    PS1="${ps1}"
+}
+__prompt_assemble "${PS1}"
