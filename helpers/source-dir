@@ -19,6 +19,8 @@ if ! type source-dir-ordered &> /dev/null ; then
     _read_deps()
     {
 	local line found
+	_topo_deps=()
+	_topo_rev_deps=()
 	while read line ; do
 	    [[ -z "${found}" && ! $line =~ ^## ]] && continue
 	    [[ -n "${found}" && ! $line =~ ^## ]] && break
@@ -32,24 +34,41 @@ if ! type source-dir-ordered &> /dev/null ; then
 		    line=${line%%*([[:space:]])}
 		    [[ -n "${line}" ]] && _topo_deps+=(${line})
 		    ;;
+		required-by:*)
+		    line=${line#required-by:}
+		    line=${line##*([[:space:]])}
+		    line=${line%%*([[:space:]])}
+		    [[ -n "${line}" ]] && _topo_rev_deps+=(${line})
+		    ;;
 	    esac
 	done < "${_topo_dir}/$1"
     }
 
-    _build_topo_add_one()
+    _build_topo_pend()
     {
-	_topo_deps=()
-	[[ ${_topo_loaded[$1]+test}  ]] && _topo_deps=("${_topo_loaded[$1]}")
-	[[ ${_topo_pending[$1]+test} ]] && _topo_deps=("${_topo_pending[$1]}")
-	[[ ${#_topo_deps} -eq 0 ]] && _read_deps "$1"
-	for dep in "${_topo_deps[@]}" ; do
-	    if [[ -f "${_topo_dir}/${dep}" && -r "${_topo_dir}/${dep}" \
-		&& ! ${_topo_loaded[$dep]+test} ]] ; then
-		_topo_pending[$1]="${_topo_deps[@]}"
+	_read_deps "$1" || return 1
+	for d in "${_topo_deps[@]}" ; do
+	    [[ -f "${_topo_dir}/${d}" && -r "${_topo_dir}/${d}" ]] \
+		&& _topo_pending[$1]="${_topo_pending[$1]}${_topo_pending[$1]:+ }${d}"
+	done
+	for d in "${_topo_rev_deps[@]}" ; do
+	    [[ -f "${_topo_dir}/${d}" && -r "${_topo_dir}/${d}" ]] \
+		&& _topo_pending[$d]="${_topo_pending[$d]}${_topo_pending[$d]:+ }$1"
+	done
+	# no dependencies case
+	[[ ! ${_topo_pending[$1]+test} ]] && _topo_pending[$1]=""
+    }
+
+    _build_topo_resolve()
+    {
+	for dep in ${_topo_pending[$1]} ; do
+	    if [[ -n "${dep}" && ! ${_topo_loaded["$dep"]+test} ]] ; then
 		return 1
 	    fi
 	done
-	_topo_loaded[$1]="${_topo_deps[@]}"
+	# all dependencies loaded, add $1 to order and remove
+	# from pending
+	_topo_loaded["$1"]=""
 	unset _topo_pending["$1"]
 	_topo_order+=("$1")
     }
@@ -59,24 +78,25 @@ if ! type source-dir-ordered &> /dev/null ; then
 	declare -gA _topo_loaded=()
 	declare -gA _topo_pending=()
 	declare -ga _topo_deps=()
+	declare -ga _topo_rev_deps=()
 	declare -ga _topo_order=()
 	declare -g  _topo_dir="$1"
 
 	declare    _backup_glob='@(#*#|*@(~|.@(bak|orig|rej|swp|dpkg*|rpm@(orig|new|save))))'
 	for f in $1/* ; do
 	    [[ ${f} != @($_backup_glob|GNUMakefile*|Makefile*|README*) \
-		&& -f ${f} && -r ${f} ]] && _build_topo_add_one "${f#$1/}"
+		&& -f ${f} && -r ${f} ]] && _build_topo_pend "${f#$1/}"
 	done
 
 	local last
 	while [[ "${#_topo_pending[@]}" -gt 0 ]] ; do
 	    last=${#_topo_pending[@]}
 	    for item in "${!_topo_pending[@]}" ; do
-		_build_topo_add_one "$item"
+		_build_topo_resolve "$item"
 	    done
 	    if [[ "${last}" -le "${#_topo_pending[@]}" ]] ; then
 		echo    "Possible circular dependency in:"
-		echo -e "\t${_topo_pending[@]}"
+		echo -e "\t${!_topo_pending[@]}"
 		break;
 	    fi 1>&2
 	done
@@ -84,7 +104,9 @@ if ! type source-dir-ordered &> /dev/null ; then
 	for item in "${_topo_order[@]}" ; do
 	    echo "$item"
 	done > "$1/.order"
-	unset _topo_deps _topo_order _topo_loaded _topo_pending _topo_dir
+	unset \
+	    _topo_deps _topo_rev_deps \
+	    _topo_order _topo_loaded _topo_pending _topo_dir
     }
 
     source-dir-ordered()
