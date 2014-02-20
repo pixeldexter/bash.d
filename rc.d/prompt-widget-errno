@@ -1,0 +1,17 @@
+# -*- mode: shell-script -*-
+
+# display exit status of most recent pipeline ($?)
+## require: prompt-functions
+## required-by: PROMPT
+
+function __prompt_errno()
+{
+    [[ "$__saved_errno" -ne 0 ]] && echo -e " \[\e[31m\]!$__saved_errno\[\e[0m\]"
+}
+
+function __prompt_save_errno()
+{
+    __saved_errno=$?
+}
+
+prompt-register-widget errno __prompt_save_errno:__prompt_errno
