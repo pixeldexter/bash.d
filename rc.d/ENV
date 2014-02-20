@@ -28,8 +28,8 @@ test -x /usr/bin/vi  && export EDITOR=vi
 test -x /usr/bin/vim && export EDITOR=vim
 
 # prompt
-PROMPT_DIRTRIM=1
-PS1='\{chroot\}\{battery\}:\w\{git\}\{errno\} \$ '
+PROMPT_DIRTRIM=2
+PS1='\{chroot\}\{battery\}:\w\{git\}\n\{errno\}\$ '
 GIT_PS1_SHOWDIRTYSTATE=yes
 GIT_PS1_SHOWSTASHSTATE=yes
 GIT_PS1_SHOWUPSTREAM=auto

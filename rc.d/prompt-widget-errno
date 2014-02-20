@@ -6,7 +6,7 @@
 
 function __prompt_errno()
 {
-    [[ "$__saved_errno" -ne 0 ]] && echo -e " \[\e[31m\]!$__saved_errno\[\e[0m\]"
+    [[ "$__saved_errno" -ne 0 ]] && echo -e "\[\e[1;31m\]!$__saved_errno\[\e[0m\] "
 }
 
 function __prompt_save_errno()
