@@ -10,6 +10,14 @@ function __prompt_expandnp()
     echo -e "${input}"
 }
 
+function __prompt_call()
+{
+    for w in "$@" ; do
+	[[ ${_prompt_widget_postcmd[$w]+test} ]] && \
+	    ${_prompt_widget_postcmd[$w]}
+    done
+}
+
 # main prompt enabler
 function __prompt_assemble()
 {
@@ -20,15 +28,31 @@ function __prompt_assemble()
     while [[ ${#input} -ne 0 ]] ; do
 	if [[ "${input}" =~ ^([^{]+)\\\{ ]] ; then # normal data
 	    input=${input:${#BASH_REMATCH[1]}}
-	    ps1="${ps1}${BASH_REMATCH[1]}"
-	elif [[ "${input}" =~ ^\\\{([a-z0-9_-]+)\\\} ]] ; then # widget reference
+	    ps1+="${BASH_REMATCH[1]}"
+	elif [[ "${input}" =~ ^\\\{([a-z0-9_-]+) ]] ; then # widget reference
 	    input=${input:${#BASH_REMATCH[0]}}
+	    local wname=${BASH_REMATCH[1]} command=""
 	    # test for widget existence
-	    if [[  ${_prompt_widget_precmd[${BASH_REMATCH[1]}]+test} \
-		|| ${_prompt_widget_cmd[${BASH_REMATCH[1]}]+test}    \
-		|| ${_prompt_widget_postmd[${BASH_REMATCH[1]}]+test} ]] ; then
-		ps1="${ps1}\$(__prompt_expandnp \"\$__prompt_${BASH_REMATCH[1]}\")"
-		widget_list+=("${BASH_REMATCH[1]}")
+	    if [[  ${_prompt_widget_precmd[$wname]+test} \
+		|| ${_prompt_widget_cmd[$wname]+test}    \
+		|| ${_prompt_widget_postmd[$wname]+test} ]] ; then
+		widget_list+=("$wname")
+		command=${_prompt_widget_cmd[$wname]}
+	    fi
+
+	    # gobble up an optional param
+	    local param=""
+	    while [[ ${#input} -ne 0 ]] ; do
+		[[ "${input}" =~ ^([^\\]*)\\(.) ]] || break
+		param+="${BASH_REMATCH[1]}"
+		input=${input:${#BASH_REMATCH[0]}}
+
+		[[ "${BASH_REMATCH[2]}" == "}" ]] && break
+		param+="\\${BASH_REMATCH[2]}"
+	    done
+
+	    if [[ ${_prompt_widget_cmd[$wname]+test} ]] ; then
+		ps1+="\$(__prompt_expandnp \"\$($command '$param')\")"
 	    fi
 	else
 	    ps1="${ps1}${input}"
@@ -38,17 +62,15 @@ function __prompt_assemble()
 
     for w in "${widget_list[@]}" ; do
 	[[ ${_prompt_widget_precmd[$w]+test}  ]] && \
-	    cmd="${cmd}${cmd:+; }${_prompt_widget_precmd[$w]}"
+	    cmd+="${cmd:+; }${_prompt_widget_precmd[$w]}"
     done
+
+    local -a postcmds
     for w in "${widget_list[@]}" ; do
-	if [[ ${_prompt_widget_cmd[$w]+test}  ]] ; then
-	    cmd="${cmd}${cmd:+; }__prompt_${w}=\$(${_prompt_widget_cmd[$w]})"
-	fi
+	[[ ${_prompt_widget_postcmd[$w]+test} ]] && postcmds+=($w)
     done
-    for w in "${widget_list[@]}" ; do
-	[[ ${_prompt_widget_postcmd[$w]+test} ]] && \
-	    cmd="${cmd}${cmd:+; }${_prompt_widget_postcmd[$w]}"
-    done
+    [[ "${#postcmds[@]}" -gt 0 ]] && \
+	ps1+="\$(__prompt_call ${postcmds[@]})"
 
     PROMPT_COMMAND="${cmd}"
     PS1="${ps1}"
