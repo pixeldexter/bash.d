@@ -1,0 +1,27 @@
+# -*- mode: shell-script -*-
+
+## require: prompt-functions
+## required-by: PROMPT
+
+function __prompt_xtitle()
+{
+    [[ -z "${__prompt_xtitle_suspend}" ]] || return
+    echo -ne "\[\e]0;\]$@\[\a\c\]"
+}
+
+function xtitle()
+{
+    if [[ $# -eq 0 ]] ; then
+	unset __prompt_xtitle_suspend
+	return
+    fi
+    echo -e "\e]0;$*\a\c"
+    __prompt_xtitle_suspend=yes
+}
+
+case "$TERM" in
+    xterm*|rxvt*)
+	prompt-register-widget xtitle __prompt_xtitle
+	[[ -n "${PS1_XTITLE}" ]] && PS1="\{xtitle ${PS1_XTITLE}\}${PS1}"
+	;;
+esac

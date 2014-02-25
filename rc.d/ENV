@@ -29,6 +29,7 @@ test -x /usr/bin/vim && export EDITOR=vim
 
 # prompt
 PROMPT_DIRTRIM=2
+PS1_XTITLE="\u@\h:\w [\t]"
 PS1='\{chroot\}\{battery\}:\w\{git\}\n\{errno\}\$ '
 GIT_PS1_SHOWDIRTYSTATE=yes
 GIT_PS1_SHOWSTASHSTATE=yes
