@@ -1,6 +1,5 @@
 # -*- shell-script -*-
 # Color customizations
-## require: ENV
 
 declare -Ag _COLORS_
 _COLORS_[RED]="\033[0;31m"

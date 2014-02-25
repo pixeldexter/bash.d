@@ -1,6 +1,5 @@
 # -*- mode: shell-script -*-
 
-## require: ENV
 ## require: prompt-functions
 ## required-by: PROMPT
 

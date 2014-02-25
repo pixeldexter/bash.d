@@ -4,6 +4,9 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+# source static (w/o deps) environment setup
+source ~/.bash.d/ENV
+
 . ~/.bash.d/helpers/source-dir
 
 # The only step required here is to source rc.d directory.
