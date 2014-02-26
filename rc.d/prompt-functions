@@ -5,6 +5,24 @@ declare -gA _prompt_widget_cmd
 declare -gA _prompt_widget_postcmd
 declare -g  PROMPT_WIDGETS
 
+# call a command and expand nonprinting sequences (\[ and \])
+# to readline escapes (\001 and \002) in the output.
+#
+# syntax: prompt-expand-nonprinting command [args]
+#
+function prompt-expand-nonprinting()
+{
+    local cmd=$1
+    shift
+
+    [[ -z "${cmd}" ]] && return 2
+
+    local output=$(${cmd} "$@")
+    output="${output//\\[/\001}"
+    output="${output//\\]/\002}"
+    echo -e "${output}"
+}
+
 function prompt-register-widget()
 {
     [[ -z "$1" || -z "$2" ]] && return 2

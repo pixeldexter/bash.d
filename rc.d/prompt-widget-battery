@@ -34,11 +34,11 @@ function __battery_show()
 
 	if [[ -n "$support_color" ]] ; then
 	    if   [[ "${cap}" -ge 5 ]] ; then
-		result="${result}\[\e[92m\]"
+		result="${result}\001\e[92m\002"
 	    elif [[ "${cap}" -gt 1 ]] ; then
-		result="${result}\[\e[93m\]"
+		result="${result}\001\e[93m\002"
 	    else
-		result="${result}\[\e[91m\]"
+		result="${result}\001\e[91m\002"
 	    fi
 	fi
 
@@ -49,7 +49,7 @@ function __battery_show()
 	fi
 
 	if [[ -n "$support_color" ]] ; then
-	    result="${result}\[\e[0m\]"
+	    result="${result}\001\e[0m\002"
 	fi
     done
 

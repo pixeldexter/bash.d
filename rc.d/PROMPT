@@ -1,15 +1,5 @@
 # -*- mode: shell-script -*-
 
-# expand non-printing character boundary markers manually
-# this is a hack, but it works
-function __prompt_expandnp()
-{
-    local input=$1
-    input="${input//\\[/\001}"
-    input="${input//\\]/\002}"
-    echo -e "${input}"
-}
-
 function __prompt_call()
 {
     for w in "$@" ; do
@@ -52,7 +42,7 @@ function __prompt_assemble()
 	    done
 
 	    if [[ ${_prompt_widget_cmd[$wname]+test} ]] ; then
-		ps1+="\$(__prompt_expandnp \"\$($command '$param')\")"
+		ps1+="\$($command $param)"
 	    fi
 	else
 	    ps1="${ps1}${input}"

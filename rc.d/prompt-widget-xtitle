@@ -6,7 +6,7 @@
 function __prompt_xtitle()
 {
     [[ -z "${__prompt_xtitle_suspend}" ]] || return
-    echo -ne "\[\e]0;\]$@\[\a\c\]"
+    echo -ne "\001\e]0;$@\a\002"
 }
 
 function xtitle()

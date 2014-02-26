@@ -10,7 +10,7 @@ function _git_prompt_show()
     # we ain't need no stinking prefixes
     __git_ps1 '' ''
     # just return what __git_ps1 tells us
-    echo -e "$PS1"
+    prompt-expand-nonprinting echo "$PS1"
 }
 
 prompt-register-widget git _git_prompt_show
