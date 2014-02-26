@@ -3,7 +3,6 @@
 #
 # assign aliases the same completion method as for its
 # parent command
-## require: COMPLETION
 
 _auto_alias_completions()
 {

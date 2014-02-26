@@ -7,6 +7,13 @@
 # source static (w/o deps) environment setup
 source ~/.bash.d/ENV
 
+# Load programmatic completion whatever is installed
+# in the system (ideally, it should be already enabled
+# in /etc/profile)
+if [ -f /etc/bash_completion ]; then
+   source /etc/bash_completion
+fi
+
 . ~/.bash.d/helpers/source-dir
 
 # The only step required here is to source rc.d directory.
