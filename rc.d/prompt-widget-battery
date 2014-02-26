@@ -8,54 +8,47 @@
 ## require: prompt-functions
 ## required-by: PROMPT
 
-declare -agr _battery_unicode_drawings=(
-    "_"      # 00%-10%
-    "\u2581" # 10%-20%
-    "\u2582" # 20%-30%
-    "\u2583" # 30%-40%
-    "\u2584" # 40%-50%
-    "\u2585" # 50%-60%
-    "\u2586" # 60%-70%
-    "\u2587" # 70%-80%
-    "\u2588" # 80%-90%
-    "\u2588" # 90%-100%
-)
+declare -gr _battery_glyphs=$'\u005f\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588\u2588'
+
+declare -g BATTERY_THR_LO=20
+declare -g BATTERY_THR_HI=60
 
 function __battery_show()
 {
-    local batt cap result
-    local support_color=y support_unicode=y
+    local batt result
+    local support_color=y
+    local color color_red color_yel color_grn color_off
+
+    if [[ -n "${support_color}" ]] ; then
+	color_red="\001\e[91m\002"
+	color_yel="\001\e[93m\002"
+	color_grn="\001\e[92m\002"
+	color_off="\001\e[0m\002"
+    fi
 
     for batt in /sys/class/power_supply/BAT*/ ; do
-	cap=$(<$batt/capacity)
-	[[ -z "${cap}" ]] && continue
-	let $((cap/=10))
-	[[ "${cap}" -ge 10 ]] && cap=9
+	batt=$(<$batt/capacity)
+	[[ -z "${batt}" ]] && continue
 
-	if [[ -n "$support_color" ]] ; then
-	    if   [[ "${cap}" -ge 5 ]] ; then
-		result="${result}\001\e[92m\002"
-	    elif [[ "${cap}" -gt 1 ]] ; then
-		result="${result}\001\e[93m\002"
-	    else
-		result="${result}\001\e[91m\002"
-	    fi
-	fi
-
-	if [[ -n "$support_unicode" ]] ; then
-	    result="${result}${_battery_unicode_drawings[$cap]}"
+	# determine color
+	if   [[ "${batt}" -ge "${BATTERY_THR_HI}" ]] ; then
+	    color="${color_grn}"
+	elif [[ "${batt}" -ge "${BATTERY_THR_LO}" ]] ; then
+	    color="${color_yel}"
 	else
-	    result="${result}${cap}"
+	    color="${color_red}"
 	fi
 
-	if [[ -n "$support_color" ]] ; then
-	    result="${result}\001\e[0m\002"
-	fi
+	# the complicated expression is simply a
+	# 0-100 range capped and scaled to a size
+	# of _battery_glyphs array
+	result+="\
+${color}\
+${_battery_glyphs:$(($batt>=100?${#_battery_glyphs}-1 : $batt / ${#_battery_glyphs})):1}\
+${color_off}"
     done
 
-    if [[ -n "${result}" ]] ; then
-	echo -e "[${result}]"
-    fi
+    [[ -n "${result}" ]] && printf "[%b]\n" "${result}"
 }
 
 prompt-register-widget battery __battery_show
