@@ -66,6 +66,19 @@ function prompt-unregister-widget()
     unset _prompt_widget_postcmd[$1]
 }
 
+function __prompt_getkeys()
+{
+    local -A map
+    for key in "${!_prompt_widget_precmd[@]}" \
+	       "${!_prompt_widget_cmd[@]}"    \
+               "${!_prompt_widget_postcmd[@]}" ;
+    do
+	map["$key"]=""
+    done
+
+    echo "${!map[*]}"
+}
+
 function prompt-list-widget()
 {
     if [[ -n "${1}" ]] ; then
@@ -77,12 +90,12 @@ ${_prompt_widget_postcmd[$1]:+:${_prompt_widget_postcmd[$1]}:}\
 	return 0
     fi
 
-    local -A map
-    for key in "${!_prompt_widget_precmd[@]}" \
-	       "${!_prompt_widget_cmd[@]}"    \
-               "${!_prompt_widget_postcmd[@]}" ;
-    do
-	map["$key"]=""
-    done
-    echo "Available widgets: ${!map[@]}"
+    echo "Available widgets: $(__prompt_getkeys)"
 }
+
+function __prompt_complete_list()
+{
+    COMPREPLY=($(compgen -W "$(__prompt_getkeys)" -- ${COMP_WORDS[COMP_CWORD]}))
+}
+
+complete -F __prompt_complete_list prompt-list-widget
