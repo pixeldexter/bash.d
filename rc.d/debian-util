@@ -1,0 +1,17 @@
+# -*- mode: shell-script -*-
+#
+
+debian-version()
+{
+    if [[ -z "$1" || -z "$2" ]] ; then
+	echo "Usage debian-version ver ver"
+	return 2
+    fi
+
+    echo -ne "$1 "
+    for t in eq lt gt ; do
+	dpkg --compare-versions $1 $t $2 && echo -ne "$t"
+    done
+    echo -ne " $2"
+    echo -ne "\n"
+}
