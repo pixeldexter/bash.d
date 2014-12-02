@@ -1,0 +1,11 @@
+# -*- shell-script -*-
+# fast AES based random number generator
+# as suggested in http://serverfault.com/questions/6440/is-there-an-alternative-to-dev-urandom
+
+function frng()
+{
+        openssl enc -aes-256-ctr \
+                    -pass pass:"$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64)" \
+                    -nosalt < /dev/zero 
+}
+
