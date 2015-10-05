@@ -45,8 +45,8 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1="${PS1//\\\w/\\[\\033[01;34m\]\\w\\[\\033[00m\]}" # colorize \w
-    PS1="${PS1//\\\u/\\[\\033[00;35m\]\\u\\[\\033[00m\]}" # colorize \u
+    PS1="${PS1//\\\w/\\[\\033[01;34m\\]\\w\\[\\033[00m\\]}" # colorize \w
+    PS1="${PS1//\\\u/\\[\\033[00;35m\\]\\u\\[\\033[00m\\]}" # colorize \u
 fi
 unset color_prompt force_color_prompt
 

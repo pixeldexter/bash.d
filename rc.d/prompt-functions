@@ -18,8 +18,8 @@ function prompt-expand-nonprinting()
     [[ -z "${cmd}" ]] && return 2
 
     local output=$(${cmd} "$@")
-    output="${output//\\[/\001}"
-    output="${output//\\]/\002}"
+    output="${output//\\[/\\0001}"
+    output="${output//\\]/\\0002}"
     echo -e "${output}"
 }
 
