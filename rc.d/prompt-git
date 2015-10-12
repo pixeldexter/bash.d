@@ -3,14 +3,41 @@
 ## require: prompt-functions
 ## required-by: PROMPT
 
+declare _git_prompt_version
+declare -a _git_prompt_verinfo
+
 function _git_prompt_show()
 {
     # Nasty, but __git_ps1 will clobber PS1 !
     local PS1
+    local promptvars_restore
+
+    # workaround expansion bug by telling git_ps1
+    # expansion is not enabled
+    if [[ $_git_prompt_wa_expansion=yes ]] ; then
+        shopt -q promptvars && promptvars_restore=yes
+        shopt -u promptvars
+    fi
+
     # we ain't need no stinking prefixes
     __git_ps1 '' ''
+
+    [[ -n $promptvars_restore ]] && shopt -s promptvars
+
     # just return what __git_ps1 tells us
     prompt-expand-nonprinting echo "$PS1"
 }
+
+function _git_prompt_readver()
+{
+    local IFS
+    local -a vstr
+    vstr=($(git --version))
+    _git_prompt_version="${vstr[2]}"
+    IFS='.' _git_prompt_verinfo=(${_git_version})
+}
+
+_git_prompt_wa_expansion=no
+[[ $(printf "10#%02d%02d%02d" ${_git_prompt_verinfo[*]}) -ge "10#010904" ]] && _git_prompt_wa_expansion=yes
 
 prompt-register-widget git _git_prompt_show
